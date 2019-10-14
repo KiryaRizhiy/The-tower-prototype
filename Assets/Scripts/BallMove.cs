@@ -47,7 +47,27 @@ public class BallMove : MonoBehaviour
             return GetComponent<Collider>();
         }
     }
-    private bool writeLog = true, hasCollision = false;
+    private bool writeLog = false, hasCollision = false;
+    private bool victoryZoneReached
+    {
+        get
+        {
+            if (currentCollider == null)
+                return false;
+            else
+                return currentCollider.tag == "victoryZone";
+        }
+    }
+    private bool defeatureZoneReached
+    {
+        get
+        {
+            if (currentCollider == null)
+                return false;
+            else
+            return currentCollider.tag == "defeatureZone";
+        }
+    }
     private bool isInTheAir
     {
         get
@@ -56,6 +76,7 @@ public class BallMove : MonoBehaviour
         }
     }
     private Collision currentCollision;
+    private Collider currentCollider;
     private string contactObjectType
     {
         get
@@ -64,6 +85,16 @@ public class BallMove : MonoBehaviour
                 return currentCollision.gameObject.tag;
             else
                 return "air";
+        }
+    }
+    private float victoryZoneReachTime;
+    private float timeToVictory
+    {
+        get
+        {
+            if (victoryZoneReached)
+                return Settings.victoryCondotion - (Time.time - victoryZoneReachTime);
+            else return 1f;
         }
     }
 
@@ -91,6 +122,8 @@ public class BallMove : MonoBehaviour
             Jump();
         }
         Logger.AddContent(UILogDataTypes.BallState, "Is in the air : " + isInTheAir + ", contact to object : " + contactObjectType , true);
+        if (victoryZoneReached) Logger.AddContent(UILogDataTypes.GameEvents, "Time to victory: " + (Settings.victoryCondotion - (Time.time - victoryZoneReachTime)), true);
+        if (timeToVictory <= 0) GameMenu.Victory();
     }
     void OnCollisionEnter(Collision collision)
     {
@@ -106,6 +139,24 @@ public class BallMove : MonoBehaviour
     {
         hasCollision = true;
         currentCollision = collision;
+    }
+    void OnTriggerEnter(Collider collider)
+    {
+        currentCollider = collider;//Musthave!! victoryZoneReached property computing is based in cuurentCollider
+        if (victoryZoneReached) victoryZoneReachTime = Time.time;
+        if (defeatureZoneReached) Defeat();
+    }
+    //void OnTriggerStay(Collider collider)
+    //{
+    //    currentCollider = collider;
+    //    if (collider.tag == "victoryZone")
+    //    {
+    //        Logger.AddContent(UILogDataTypes.GameEvents, "Seconds to victory", true);
+    //    }
+    //}
+    void OnTriggerExit(Collider collider)
+    {
+        currentCollider = null;
     }
     private Vector3 NormalizedForceVectorByDiraction(MovingDiractions Diraction)
     {
@@ -171,5 +222,10 @@ public class BallMove : MonoBehaviour
         if (isInTheAir) return;
         Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
         BallBody.velocity = Vector3.up * Settings.ballJumpIntensivity;
+    }
+    private void Defeat()
+    {
+        GameMenu.Defeture();
+        Destroy(gameObject);
     }
 }

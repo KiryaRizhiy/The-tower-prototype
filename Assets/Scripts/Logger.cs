@@ -33,6 +33,7 @@ public static class Logger
         string text;
         text = GetContentByType(UILogDataTypes.PressedButton);
         text = text + System.Environment.NewLine + GetContentByType(UILogDataTypes.BallState);
+        text = text + System.Environment.NewLine + GetContentByType(UILogDataTypes.GameEvents);
 
         return text;
     }
@@ -71,4 +72,4 @@ public static class Logger
         }
     }
 }
-public enum UILogDataTypes {PressedButton,BallState};
+public enum UILogDataTypes {PressedButton,BallState,GameEvents};

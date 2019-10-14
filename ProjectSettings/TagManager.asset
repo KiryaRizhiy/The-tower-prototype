@@ -6,6 +6,8 @@ TagManager:
   tags:
   - floor
   - kernel
+  - victoryZone
+  - defeatureZone
   layers:
   - Default
   - TransparentFX

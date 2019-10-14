@@ -10,5 +10,6 @@ public static class Settings
         ballSideMoveIntensivity = 4f, 
         ballInAirSideMoveIntensivity = 1.2f, 
         ballMoveIntensivity = 6f,
-        ballInAirMoveIntensivity = 1.3f;
+        ballInAirMoveIntensivity = 1.3f,
+        victoryCondotion = 3f;
 }
