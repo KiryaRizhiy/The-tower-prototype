@@ -47,7 +47,7 @@ public class BallMove : MonoBehaviour
             return GetComponent<Collider>();
         }
     }
-    private bool WriteLog = true, hasCollision = false;
+    private bool writeLog = true, hasCollision = false;
     private bool isInTheAir
     {
         get
@@ -72,27 +72,22 @@ public class BallMove : MonoBehaviour
     {
         if (Input.GetKey("w"))
         {
-            if (WriteLog) Debug.Log("Moving " + MovingDiractions.Forward.ToString());
             Move(MovingDiractions.Forward);
         }
         if (Input.GetKey("s"))
         {
-            if (WriteLog) Debug.Log("Moving " + MovingDiractions.Backward.ToString());
             Move(MovingDiractions.Backward);
         }
         if (Input.GetKey("a"))
         {
-            if (WriteLog) Debug.Log("Moving " + MovingDiractions.Left.ToString());
             Move(MovingDiractions.Left);
         }
         if (Input.GetKey("d"))
         {
-            if (WriteLog) Debug.Log("Moving " + MovingDiractions.Right.ToString());
             Move(MovingDiractions.Right);
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (WriteLog) Debug.Log("Jump");
             Jump();
         }
         Logger.AddContent(UILogDataTypes.BallState, "Is in the air : " + isInTheAir + ", contact to object : " + contactObjectType , true);
@@ -118,16 +113,16 @@ public class BallMove : MonoBehaviour
         switch (Diraction)
         {
             case MovingDiractions.Forward:
-                ResultVector = Functions.SetFlatMagnitude(ForwardPoint - transform.position + Vector3.up * transform.position.y, GetIntensivity(Diraction));
+                ResultVector = Functions.SetFlatMagnitude(ForwardPoint - transform.position, GetIntensivity(Diraction));
                 break;
             case MovingDiractions.Backward:
-                ResultVector = Functions.SetFlatMagnitude(BackwardPoint - transform.position + Vector3.up * transform.position.y, GetIntensivity(Diraction));
+                ResultVector = Functions.SetFlatMagnitude(BackwardPoint - transform.position, GetIntensivity(Diraction));
                 break;
             case MovingDiractions.Left:
-                ResultVector = Functions.SetFlatMagnitude(LeftPoint, GetIntensivity(Diraction));
+                ResultVector = Functions.SetFlatMagnitude(LeftPoint - transform.position, GetIntensivity(Diraction));
                 break;
             case MovingDiractions.Right:
-                ResultVector = Functions.SetFlatMagnitude(RightPoint, GetIntensivity(Diraction));
+                ResultVector = Functions.SetFlatMagnitude(RightPoint - transform.position, GetIntensivity(Diraction));
                 break;
             default:
                 Debug.LogError("Cant compute vector for unknown diraction" + Diraction.ToString());
@@ -135,6 +130,7 @@ public class BallMove : MonoBehaviour
                 break;
         }
         Logger.AddContent(UILogDataTypes.PressedButton, "Ball diraction - " + Diraction.ToString(), true);
+        if(writeLog) Functions.DrawTemporalLine(transform.position, transform.position + ResultVector);
         return ResultVector;
     }
     private float GetIntensivity(MovingDiractions diraction)
@@ -173,6 +169,7 @@ public class BallMove : MonoBehaviour
     private void Jump()
     {
         if (isInTheAir) return;
+        Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
         BallBody.velocity = Vector3.up * Settings.ballJumpIntensivity;
     }
 }
