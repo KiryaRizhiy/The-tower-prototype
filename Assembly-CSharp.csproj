@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\BallMove.cs" />
     <Compile Include="Assets\Scripts\CameraFollower.cs" />
+    <Compile Include="Assets\Scripts\Engine.cs" />
     <Compile Include="Assets\Scripts\Functions.cs" />
     <Compile Include="Assets\Scripts\GameMenu.cs" />
     <Compile Include="Assets\Scripts\Logger.cs" />

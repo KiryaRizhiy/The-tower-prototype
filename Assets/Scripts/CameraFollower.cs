@@ -31,6 +31,8 @@ public class CameraFollower : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Ball == null)
+            return;
         transform.position = pointBehindTheBall;
         transform.rotation = Quaternion.LookRotation(PointAfterTheBall - transform.position, Vector3.up);
         if(WriteLog) Functions.DrawTemporalLine(transform.position, PointAfterTheBall);
