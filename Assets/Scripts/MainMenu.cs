@@ -8,11 +8,11 @@ public class MainMenu : MonoBehaviour
 {
     public static Dropdown levelSelector;
     private List<string> levels;
-
     void Start()
     {
         levelSelector = transform.GetChild(0).GetChild(0).GetComponent<Dropdown>();
         levels = new List<string>();
+        //Engine.Initialize();
         for (int i = 1; i <= Settings.levelsCount; i++)
         {
             levels.Add("Level" + i.ToString());
@@ -21,7 +21,6 @@ public class MainMenu : MonoBehaviour
         levelSelector.value = 1;
         levelSelector.value = 0;
     }
-
     public void StartLevel()
     {
         SceneManager.LoadScene(levels[levelSelector.value], LoadSceneMode.Single);
