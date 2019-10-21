@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,12 +31,19 @@ public static class Logger
     }
     public static string GetAllContent()
     {
-        string text;
-        text = GetContentByType(UILogDataTypes.PressedButton);
-        text = text + System.Environment.NewLine + GetContentByType(UILogDataTypes.BallState);
-        text = text + System.Environment.NewLine + GetContentByType(UILogDataTypes.GameEvents);
-
+        string text = "";
+        foreach (UILogDataTypes _dataType in Enum.GetValues(typeof(UILogDataTypes)))
+        {
+            if (!String.IsNullOrEmpty(text))
+                text = text + System.Environment.NewLine;
+            text = text + GetContentByType(_dataType);
+        }
         return text;
+    }
+    public static void RemoveAllContent()
+    {
+        foreach (UILogDataTypes _dataType in Enum.GetValues(typeof(UILogDataTypes)))
+            LogStorage.Remove(LogStorage.Find(x => x.dataType == _dataType));
     }
     private static string GetContentByType(UILogDataTypes type)
     {
@@ -49,7 +57,6 @@ public static class Logger
             return info;
         }
     }
-
     private class LogContentInfo
     {
         public UILogDataTypes dataType;
@@ -72,4 +79,4 @@ public static class Logger
         }
     }
 }
-public enum UILogDataTypes {PressedButton,BallState,GameEvents};
+public enum UILogDataTypes {SceneData,PressedButton,BallState,GameEvents};

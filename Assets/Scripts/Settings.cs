@@ -12,4 +12,5 @@ public static class Settings
         ballMoveIntensivity = 6f,
         ballInAirMoveIntensivity = 1.3f,
         victoryCondotion = 3f;
+    public static int levelsCount = 2;
 }
