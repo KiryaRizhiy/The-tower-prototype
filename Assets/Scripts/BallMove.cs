@@ -97,6 +97,7 @@ public class BallMove : MonoBehaviour
             else return 1f;
         }
     }
+    private float spentEnergy = 0f;
 
     // Update is called once per frame
     void Update()
@@ -215,13 +216,27 @@ public class BallMove : MonoBehaviour
     }
     private void Move(MovingDiractions Diraction)
     {
-        BallBody.AddForce(NormalizedForceVectorByDiraction(Diraction));
+        if (spentEnergy < Settings.levelEnergy)
+        {
+            BallBody.AddForce(NormalizedForceVectorByDiraction(Diraction));
+            spentEnergy += NormalizedForceVectorByDiraction(Diraction).magnitude * Settings.energyMultiplyer;
+            Logger.UpdateContent(UILogDataTypes.EnergyAmount, "Energy spent: " + spentEnergy + "/" + Settings.levelEnergy);
+        }
+        else
+            Defeat();
     }
     private void Jump()
     {
         if (isInTheAir) return;
-        Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
-        BallBody.velocity = Vector3.up * Settings.ballJumpIntensivity;
+        if (spentEnergy < Settings.levelEnergy)
+        {
+            Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
+            Logger.UpdateContent(UILogDataTypes.EnergyAmount, "Energy spent: " + spentEnergy + "/" + Settings.levelEnergy);
+            BallBody.velocity += Vector3.up * Settings.ballJumpIntensivity;
+            spentEnergy += Settings.ballJumpIntensivity*Settings.energyMultiplyer;
+        }
+        else
+            Defeat();
     }
     private void Defeat()
     {
