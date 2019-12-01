@@ -79,4 +79,4 @@ public static class Logger
         }
     }
 }
-public enum UILogDataTypes {SceneData,PressedButton,BallState,GameEvents};
+public enum UILogDataTypes {EnergyAmount,SceneData,PressedButton,BallState,GameEvents};
