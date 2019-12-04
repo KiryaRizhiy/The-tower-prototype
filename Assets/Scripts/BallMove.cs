@@ -97,6 +97,16 @@ public class BallMove : MonoBehaviour
             else return 1f;
         }
     }
+    private Vector2 moveControlTouchCoordinates
+    {
+        get
+        {
+            foreach (Touch _t in Input.touches)
+                if ((_t.position - GameMenu.MoveControlCoordinates).magnitude <= GameMenu.MoveControlRadius * 2)
+                    return _t.position;
+            return Vector2.zero;
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -120,6 +130,10 @@ public class BallMove : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Jump();
+        }
+        if (moveControlTouchCoordinates != Vector2.zero)
+        {
+            Move(moveControlTouchCoordinates);
         }
         Logger.AddContent(UILogDataTypes.BallState, "Is in the air : " + isInTheAir + ", contact to object : " + contactObjectType , true);
         if (victoryZoneReached) Logger.AddContent(UILogDataTypes.GameEvents, "Time to victory: " + (Settings.victoryCondotion - (Time.time - victoryZoneReachTime)), true);
@@ -158,7 +172,7 @@ public class BallMove : MonoBehaviour
     {
         currentCollider = null;
     }
-    private Vector3 NormalizedForceVectorByDiraction(MovingDiractions Diraction)
+    private Vector3 ForceVectorByDiraction(MovingDiractions Diraction)
     {
         Vector3 ResultVector;
         switch (Diraction)
@@ -183,6 +197,13 @@ public class BallMove : MonoBehaviour
         Logger.AddContent(UILogDataTypes.PressedButton, "Ball diraction - " + Diraction.ToString(), true);
         if(writeLog) Functions.DrawTemporalLine(transform.position, transform.position + ResultVector);
         return ResultVector;
+    }
+    private Vector3 ForceVectorByDiraction(Vector2 Diraction)
+    {
+        Vector2 result;
+        result.x = Diraction.x * GetIntensivity(MovingDiractions.Forward);
+        result.y = Diraction.y * GetIntensivity(MovingDiractions.Left);
+        return Vector2.zero;
     }
     private float GetIntensivity(MovingDiractions diraction)
     {
@@ -215,13 +236,17 @@ public class BallMove : MonoBehaviour
     }
     private void Move(MovingDiractions Diraction)
     {
-        BallBody.AddForce(NormalizedForceVectorByDiraction(Diraction));
+        BallBody.AddForce(ForceVectorByDiraction(Diraction));
+    }
+    private void Move(Vector2 Diraction)
+    {
+        BallBody.AddForce(ForceVectorByDiraction(Diraction));
     }
     private void Jump()
     {
         if (isInTheAir) return;
         Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
-        BallBody.velocity = Vector3.up * Settings.ballJumpIntensivity;
+        BallBody.velocity += Vector3.up * Settings.ballJumpIntensivity;
     }
     private void Defeat()
     {

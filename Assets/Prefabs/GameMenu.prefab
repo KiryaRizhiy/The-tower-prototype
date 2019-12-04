@@ -303,7 +303,7 @@ GameObject:
   - component: {fileID: 3437478671014106723}
   - component: {fileID: 3437478671014106725}
   m_Layer: 5
-  m_Name: Text
+  m_Name: Debug panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
