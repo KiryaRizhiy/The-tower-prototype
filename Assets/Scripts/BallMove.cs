@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class BallMove : MonoBehaviour
 {
+    public float
+        ballJumpIntensivity = 7f,
+        ballSideMoveIntensivity = 4f,
+        ballInAirSideMoveIntensivity = 1.2f,
+        ballMoveIntensivity = 6f,
+        ballInAirMoveIntensivity = 1.3f;
     private Vector3 ForwardPoint
     {
         get
@@ -191,24 +197,32 @@ public class BallMove : MonoBehaviour
         {
             case MovingDiractions.Forward:
                 if (isInTheAir)
-                    return Settings.ballInAirMoveIntensivity;
+                    //return Settings.ballInAirMoveIntensivity; Временно перенесены из сеттингов для тюнинга
+                    return ballInAirMoveIntensivity;
                 else
-                    return Settings.ballMoveIntensivity;
+                    //return Settings.ballMoveIntensivity;
+                    return ballMoveIntensivity;
             case MovingDiractions.Backward:
                 if (isInTheAir)
-                    return Settings.ballInAirMoveIntensivity;
+                    //return Settings.ballInAirMoveIntensivity;
+                    return ballInAirMoveIntensivity;
                 else
-                    return Settings.ballMoveIntensivity;
+                    //return Settings.ballMoveIntensivity;
+                    return ballMoveIntensivity;
             case MovingDiractions.Left:
                 if (isInTheAir)
-                    return Settings.ballInAirSideMoveIntensivity;
+                    //return Settings.ballInAirSideMoveIntensivity;
+                    return ballInAirSideMoveIntensivity;
                 else
-                    return Settings.ballSideMoveIntensivity;
+                    //return Settings.ballSideMoveIntensivity;
+                    return ballSideMoveIntensivity;
             case MovingDiractions.Right:
                 if (isInTheAir)
-                    return Settings.ballInAirSideMoveIntensivity;
+                    //return Settings.ballInAirSideMoveIntensivity;
+                    return ballInAirSideMoveIntensivity;
                 else
-                    return Settings.ballSideMoveIntensivity;
+                    //return Settings.ballSideMoveIntensivity;
+                    return ballSideMoveIntensivity;
             default:
                 Debug.LogError("Cant get intensivity for unknown diraction " + diraction.ToString());
                 return 0f;
@@ -232,8 +246,10 @@ public class BallMove : MonoBehaviour
         {
             Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
             Logger.UpdateContent(UILogDataTypes.EnergyAmount, "Energy spent: " + spentEnergy + "/" + Settings.levelEnergy);
-            BallBody.velocity += Vector3.up * Settings.ballJumpIntensivity;
-            spentEnergy += Settings.ballJumpIntensivity*Settings.energyMultiplyer;
+            //BallBody.velocity += Vector3.up * Settings.ballJumpIntensivity;
+            //spentEnergy += Settings.ballJumpIntensivity*Settings.energyMultiplyer;
+            BallBody.velocity += Vector3.up * ballJumpIntensivity;
+            spentEnergy += ballJumpIntensivity * Settings.energyMultiplyer;
         }
         else
             Defeat();
