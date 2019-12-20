@@ -127,14 +127,19 @@ public class BallMove : MonoBehaviour
         {
             Move(MovingDiractions.Right);
         }
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space)||GameMenu.jump)
         {
             Jump();
         }
-        if (moveControlTouchCoordinates != Vector2.zero)
-        {
-            Move(moveControlTouchCoordinates);
-        }
+        if (GameMenu.joystickDiraction != Vector2.zero)
+            Logger.AddContent(UILogDataTypes.PressedButton, "Joystick diraction: " + GameMenu.joystickDiraction, true);
+        else
+            Logger.AddContent(UILogDataTypes.PressedButton, "Joystick not used now", true);
+        Move(GameMenu.joystickDiraction);
+        //if (GameMenu.joystickDiraction != Vector2.zero)
+        //{
+        //    Move(GameMenu.joystickDiraction);
+        //}
         Logger.AddContent(UILogDataTypes.BallState, "Is in the air : " + isInTheAir + ", contact to object : " + contactObjectType , true);
         if (victoryZoneReached) Logger.AddContent(UILogDataTypes.GameEvents, "Time to victory: " + (Settings.victoryCondotion - (Time.time - victoryZoneReachTime)), true);
         if (timeToVictory <= 0) GameMenu.Victory();
@@ -200,10 +205,16 @@ public class BallMove : MonoBehaviour
     }
     private Vector3 ForceVectorByDiraction(Vector2 Diraction)
     {
-        Vector2 result;
-        result.x = Diraction.x * GetIntensivity(MovingDiractions.Forward);
-        result.y = Diraction.y * GetIntensivity(MovingDiractions.Left);
-        return Vector2.zero;
+        Vector3 result = Vector3.zero;
+        if (Diraction.y > 0)
+            result += Functions.SetFlatMagnitude(ForwardPoint - transform.position, GetIntensivity(MovingDiractions.Forward) * Diraction.y);
+        if (Diraction.y < 0)
+            result += Functions.SetFlatMagnitude(BackwardPoint - transform.position, GetIntensivity(MovingDiractions.Backward) * Diraction.y * -1);
+        if (Diraction.x > 0)
+            result += Functions.SetFlatMagnitude(RightPoint - transform.position, GetIntensivity(MovingDiractions.Right) * Diraction.x);
+        if (Diraction.x < 0)
+            result += Functions.SetFlatMagnitude(LeftPoint - transform.position, GetIntensivity(MovingDiractions.Left) * Diraction.x * -1);
+        return result;
     }
     private float GetIntensivity(MovingDiractions diraction)
     {
@@ -241,8 +252,9 @@ public class BallMove : MonoBehaviour
     private void Move(Vector2 Diraction)
     {
         BallBody.AddForce(ForceVectorByDiraction(Diraction));
+        //Functions.DrawTemporalLine(transform.position, transform.position + ForceVectorByDiraction(Diraction));
     }
-    private void Jump()
+    public void Jump()
     {
         if (isInTheAir) return;
         Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
