@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class BallMove : MonoBehaviour
 {
-    public float
-        ballJumpIntensivity = 7f,
-        ballSideMoveIntensivity = 4f,
-        ballInAirSideMoveIntensivity = 1.2f,
-        ballMoveIntensivity = 6f,
-        ballInAirMoveIntensivity = 1.3f;
     private Vector3 ForwardPoint
     {
         get
@@ -103,7 +97,16 @@ public class BallMove : MonoBehaviour
             else return 1f;
         }
     }
-    private float spentEnergy = 0f;
+    private Vector2 moveControlTouchCoordinates
+    {
+        get
+        {
+            foreach (Touch _t in Input.touches)
+                if ((_t.position - GameMenu.MoveControlCoordinates).magnitude <= GameMenu.MoveControlRadius * 2)
+                    return _t.position;
+            return Vector2.zero;
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -124,10 +127,19 @@ public class BallMove : MonoBehaviour
         {
             Move(MovingDiractions.Right);
         }
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space)||GameMenu.jump)
         {
             Jump();
         }
+        if (GameMenu.joystickDiraction != Vector2.zero)
+            Logger.AddContent(UILogDataTypes.PressedButton, "Joystick diraction: " + GameMenu.joystickDiraction, true);
+        else
+            Logger.AddContent(UILogDataTypes.PressedButton, "Joystick not used now", true);
+        Move(GameMenu.joystickDiraction);
+        //if (GameMenu.joystickDiraction != Vector2.zero)
+        //{
+        //    Move(GameMenu.joystickDiraction);
+        //}
         Logger.AddContent(UILogDataTypes.BallState, "Is in the air : " + isInTheAir + ", contact to object : " + contactObjectType , true);
         if (victoryZoneReached) Logger.AddContent(UILogDataTypes.GameEvents, "Time to victory: " + (Settings.victoryCondotion - (Time.time - victoryZoneReachTime)), true);
         if (timeToVictory <= 0) GameMenu.Victory();
@@ -165,7 +177,7 @@ public class BallMove : MonoBehaviour
     {
         currentCollider = null;
     }
-    private Vector3 NormalizedForceVectorByDiraction(MovingDiractions Diraction)
+    private Vector3 ForceVectorByDiraction(MovingDiractions Diraction)
     {
         Vector3 ResultVector;
         switch (Diraction)
@@ -191,38 +203,43 @@ public class BallMove : MonoBehaviour
         if(writeLog) Functions.DrawTemporalLine(transform.position, transform.position + ResultVector);
         return ResultVector;
     }
+    private Vector3 ForceVectorByDiraction(Vector2 Diraction)
+    {
+        Vector3 result = Vector3.zero;
+        if (Diraction.y > 0)
+            result += Functions.SetFlatMagnitude(ForwardPoint - transform.position, GetIntensivity(MovingDiractions.Forward) * Diraction.y);
+        if (Diraction.y < 0)
+            result += Functions.SetFlatMagnitude(BackwardPoint - transform.position, GetIntensivity(MovingDiractions.Backward) * Diraction.y * -1);
+        if (Diraction.x > 0)
+            result += Functions.SetFlatMagnitude(RightPoint - transform.position, GetIntensivity(MovingDiractions.Right) * Diraction.x);
+        if (Diraction.x < 0)
+            result += Functions.SetFlatMagnitude(LeftPoint - transform.position, GetIntensivity(MovingDiractions.Left) * Diraction.x * -1);
+        return result;
+    }
     private float GetIntensivity(MovingDiractions diraction)
     {
         switch (diraction)
         {
             case MovingDiractions.Forward:
                 if (isInTheAir)
-                    //return Settings.ballInAirMoveIntensivity; Временно перенесены из сеттингов для тюнинга
-                    return ballInAirMoveIntensivity;
+                    return Settings.ballInAirMoveIntensivity;
                 else
-                    //return Settings.ballMoveIntensivity;
-                    return ballMoveIntensivity;
+                    return Settings.ballMoveIntensivity;
             case MovingDiractions.Backward:
                 if (isInTheAir)
-                    //return Settings.ballInAirMoveIntensivity;
-                    return ballInAirMoveIntensivity;
+                    return Settings.ballInAirMoveIntensivity;
                 else
-                    //return Settings.ballMoveIntensivity;
-                    return ballMoveIntensivity;
+                    return Settings.ballMoveIntensivity;
             case MovingDiractions.Left:
                 if (isInTheAir)
-                    //return Settings.ballInAirSideMoveIntensivity;
-                    return ballInAirSideMoveIntensivity;
+                    return Settings.ballInAirSideMoveIntensivity;
                 else
-                    //return Settings.ballSideMoveIntensivity;
-                    return ballSideMoveIntensivity;
+                    return Settings.ballSideMoveIntensivity;
             case MovingDiractions.Right:
                 if (isInTheAir)
-                    //return Settings.ballInAirSideMoveIntensivity;
-                    return ballInAirSideMoveIntensivity;
+                    return Settings.ballInAirSideMoveIntensivity;
                 else
-                    //return Settings.ballSideMoveIntensivity;
-                    return ballSideMoveIntensivity;
+                    return Settings.ballSideMoveIntensivity;
             default:
                 Debug.LogError("Cant get intensivity for unknown diraction " + diraction.ToString());
                 return 0f;
@@ -230,29 +247,18 @@ public class BallMove : MonoBehaviour
     }
     private void Move(MovingDiractions Diraction)
     {
-        if (spentEnergy < Settings.levelEnergy)
-        {
-            BallBody.AddForce(NormalizedForceVectorByDiraction(Diraction));
-            spentEnergy += NormalizedForceVectorByDiraction(Diraction).magnitude * Settings.energyMultiplyer;
-            Logger.UpdateContent(UILogDataTypes.EnergyAmount, "Energy spent: " + spentEnergy + "/" + Settings.levelEnergy);
-        }
-        else
-            Defeat();
+        BallBody.AddForce(ForceVectorByDiraction(Diraction));
     }
-    private void Jump()
+    private void Move(Vector2 Diraction)
+    {
+        BallBody.AddForce(ForceVectorByDiraction(Diraction));
+        //Functions.DrawTemporalLine(transform.position, transform.position + ForceVectorByDiraction(Diraction));
+    }
+    public void Jump()
     {
         if (isInTheAir) return;
-        if (spentEnergy < Settings.levelEnergy)
-        {
-            Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
-            Logger.UpdateContent(UILogDataTypes.EnergyAmount, "Energy spent: " + spentEnergy + "/" + Settings.levelEnergy);
-            //BallBody.velocity += Vector3.up * Settings.ballJumpIntensivity;
-            //spentEnergy += Settings.ballJumpIntensivity*Settings.energyMultiplyer;
-            BallBody.velocity += Vector3.up * ballJumpIntensivity;
-            spentEnergy += ballJumpIntensivity * Settings.energyMultiplyer;
-        }
-        else
-            Defeat();
+        Logger.AddContent(UILogDataTypes.PressedButton, "Jump", true);
+        BallBody.velocity += Vector3.up * Settings.ballJumpIntensivity;
     }
     private void Defeat()
     {
